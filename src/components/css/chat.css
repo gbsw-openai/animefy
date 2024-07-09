@@ -1,0 +1,59 @@
+/* chat.css */
+
+.chat-form {
+  display: flex;
+  align-items: center;
+  padding: 10px 10px 10px 30px;
+  border: 1px solid #000000;
+  border-radius: 50px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.chat-textarea {
+  flex-grow: 1;
+  height: 40px;
+  max-height: 150px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  resize: none;
+  outline: none;
+  font-size: 16px;
+  background-color: #ffffff;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
+  overflow-y: auto;
+  align-items: center;
+}
+
+.chat-textarea:focus {
+  background-color: #f0f0f0;
+}
+
+.chat-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 10px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.chat-button img {
+  width: 35px;
+  height: 35px;
+}
+
+.chat-button:hover {
+  transform: scale(1.1);
+}
+
+.chat-button:focus {
+  outline: none;
+}
