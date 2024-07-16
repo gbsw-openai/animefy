@@ -14,13 +14,14 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const sendMessage = async (message: string) => {
+    setMessages((prevMessages) => [...prevMessages, { text: message, sender: "user" }]);
     try {
       const response = await axios.post('http://localhost:8080/chat/1', { message: message });
       console.log(response.data);
-
-      setMessages([...messages, { text: message, sender: "user" }, { text: response.data.response, sender: "bot" }]);
+      setMessages((prevMessages) => [...prevMessages, { text: response.data.response, sender: "bot" }]);
     } catch (error) {
       console.error("Error sending message:", error);
+      setMessages((prevMessages) => [...prevMessages, { text: "AI가 오류를 일으켰습니다", sender: "bot" }]);
     }
   }
 

@@ -7,6 +7,7 @@
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin: 20px;
+  min-width: 500px;
   max-width: 800px;
   width: 100%;
 }
@@ -14,7 +15,7 @@
 .chat-textarea {
   flex-grow: 1;
   height: auto;
-  max-height: 150px; /* Ensure max-height for overflow */
+  max-height: 150px;
   padding: 10px;
   border: none;
   border-radius: 10px;
@@ -54,4 +55,76 @@
 
 .chat-button:focus {
   outline: none;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 70vh;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 820px;
+}
+
+.messages-container::-webkit-scrollbar {
+  display: none;
+}
+
+.message {
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 80%;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.user {
+  align-self: flex-end;
+  background-color: #404040;
+  color: white;
+  border-bottom-right-radius: 0;
+}
+
+.message.user::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: -10px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: #404040;
+  border-bottom: 0;
+  border-right: 0;
+  margin-left: -10px;
+  margin-bottom: -10px;
+}
+
+.message.bot {
+  align-self: flex-start;
+  background-color: #e0e0e0;
+  color: black;
+  border-bottom-left-radius: 0;
+}
+
+.message.bot::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -10px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: #e0e0e0;
+  border-bottom: 0;
+  border-left: 0;
+  margin-right: -10px;
+  margin-bottom: -10px;
 }

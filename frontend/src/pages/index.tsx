@@ -12,7 +12,7 @@ function App() {
           </button>
         </Link>
         <div>
-          <div className="pack mt(300) gap(50)">
+          <div className="pack mt(100) gap(50)">
             <div className="w(170) h(150) bg(#000) r(20)"></div>
             <div className="w(500) h(150) bg(#000) r(20) ">
               <div className="c(#fff) vpack text(center) bold font(18) p(30) gap(20)">
