@@ -1,5 +1,6 @@
 import LogoImg from "../assets/로고.png";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./css/header.css";
 
 const Header = () => {
@@ -29,29 +30,42 @@ const Header = () => {
     <>
       {(menu || animateMenu) && (
         <div
-          className={`absolute w(100%) h(100vh) bg(0,0,0,0.5) opacity(0) ${menu ? "fade-in opacity(1)" : "fade-out"
-            }`}
+          className={`absolute w(100%) h(100vh) bg(0,0,0,0.5) opacity(0) ${
+            menu ? "fade-in opacity(1)" : "fade-out"
+          }`}
           onClick={onToggle}
         >
           <div
-            className={`menu-container ${menu ? "slide-in" : "slide-out"
-              } hbox(top+left) p(10)`}
+            className={`menu-container ${
+              menu ? "slide-in" : "slide-out"
+            } hbox(top+left) p(10)`}
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={onToggle}>{"<"}</button>
-            <div className="vpack mt(30)">
-              <div>애니 평가</div>
-              <div>애니 추천</div>
-              <div>김한결</div>
+            <button onClick={onToggle} className="c(#fff) font(30) pl(10)">
+              {"<"}
+            </button>
+            <div className="vpack mt(30) c(#fff) absolute(30,30) gap(10) w(200)">
+              <Link to={"/evaluation"} className="bb(1) w(100%) bold">
+                애니 평가
+              </Link>
+              <Link to={"/suggestion"} className="bb(1) w(100%) bold">
+                애니 추천
+              </Link>
             </div>
           </div>
         </div>
       )}
       <div className="hbox space-between w(100%) p(20)">
-        <button className="b(1) w(40) h(40) bg(#f00)" onClick={onToggle}>
-          메뉴
+        <button
+          className="b(1) w(40) h(40) bg(rgb(73,73,73)) c(#fff) w(50) h(50) r(8)"
+          onClick={onToggle}
+        >
+          M
         </button>
-        <img src={LogoImg} alt="" width={160} />
+
+        <Link to={"http://localhost:5173/"}>
+          <img src={LogoImg} alt="" width={160} />
+        </Link>
       </div>
     </>
   );

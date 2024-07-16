@@ -1,69 +1,81 @@
 package services
 
 import (
-	model "backend/model"
-	"backend/repository"
 	"context"
-	"strconv"
+	"fmt"
+	"strings"
+
+	model "backend/model"
+	repo "backend/repository"
+
+	openai "github.com/sashabaranov/go-openai"
 )
 
-type AnimeService struct {
-	repo repository.AnimeRepository
+type ChatService interface {
+	GetUserFeed(userID int) ([]model.Anime, error)
+	ChatWithBot(userID int, message string) (string, error)
 }
 
-func NewAnimeService(repo repository.AnimeRepository) *AnimeService {
-	return &AnimeService{
-		repo: repo,
+type chatService struct {
+	animeRepo    repo.AnimeRepository
+	openaiClient *openai.Client
+}
+
+func NewChatService(animeRepo repo.AnimeRepository, openaiKey string) ChatService {
+	client := openai.NewClient(openaiKey)
+	return &chatService{
+		animeRepo:    animeRepo,
+		openaiClient: client,
 	}
 }
 
-func (s *AnimeService) RecommendAnime(ctx context.Context, preferences model.UserPreferences) ([]model.Anime, error) {
-	allAnimes, err := s.repo.GetAllAnimes()
+func (cs *chatService) GetUserFeed(userID int) ([]model.Anime, error) {
+	return cs.animeRepo.GetAllAnimes()
+}
+
+func (cs *chatService) ChatWithBot(userID int, message string) (string, error) {
+	animes, err := cs.animeRepo.GetAllAnimes()
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("failed to get anime data: %v", err)
 	}
 
-	var recommendedAnimes []model.Anime
+	animeData := formatAnimeData(animes)
+	prompt := fmt.Sprintf(
+		`당신은 애니를 추천해주는 친절한 언시스턴스입니다. 사용자의 물음에 친절히 대답해주세요. 자신이 가진 정보를 최대한 활용하여 사용자에게 애니메이션을 추천해 주세요. 당신이 가진 정보는 다음과 같습니다. %s. 당신이 가진 정보, anime_data에는 name, genre, type, episodes, rating, members가 중요합니다. name은 애니의 이름입니다. genre는 애니의 장르입니다. type은 애니의 유형입니다. episodes는 총 방영 수입니다. 마지막 members는 숫자가 적으면 마이너한 애니이고 숫자가 크다면 대중적인 애니입니다. 사용자에게 추천하는 애니를 최대 3개까지만 대답해주고 거짓된 정보는 누설하지 말아주세요. 또한 추천하는 애니의 설명을 자세히 해주세요.`,
+		animeData,
+	)
 
-	for _, anime := range allAnimes {
-		rating, err := strconv.ParseFloat(anime.Rating, 64)
-		if err != nil {
-			continue
-		}
-
-		if preferences.MinRating > 0 && rating < preferences.MinRating {
-			continue
-		}
-
-		if len(preferences.Genres) > 0 && !isGenrePreferred(preferences.Genres, anime.Genre) {
-			continue
-		}
-
-		recommendedAnimes = append(recommendedAnimes, anime)
+	messages := []openai.ChatCompletionMessage{
+		{Role: "system", Content: prompt},
+		{Role: "user", Content: message},
 	}
 
-	return recommendedAnimes, nil
+	req := openai.ChatCompletionRequest{
+		Model:     openai.GPT3Dot5Turbo,
+		Messages:  messages,
+		MaxTokens: 300,
+	}
+
+	ctx := context.Background()
+
+	resp, err := cs.openaiClient.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("failed to complete chat request: %v", err)
+	}
+
+	return resp.Choices[0].Message.Content, nil
 }
 
-func (s *AnimeService) EvaluateAnime(ctx context.Context, animeID int, preferences model.UserPreferences) (float64, error) {
-	anime, err := s.repo.GetAnimeByID(animeID)
-	if err != nil {
-		return 0.0, err
-	}
-
-	rating, err := strconv.ParseFloat(anime.Rating, 64)
-	if err != nil {
-		return 0.0, err
-	}
-
-	return rating, nil
-}
-
-func isGenrePreferred(preferredGenres []string, animeGenre string) bool {
-	for _, genre := range preferredGenres {
-		if genre == animeGenre {
-			return true
+func formatAnimeData(animes []model.Anime) string {
+	var sb strings.Builder
+	count := 0
+	for _, anime := range animes {
+		sb.WriteString(fmt.Sprintf("Name: %s, Genre: %s, Type: %s, Episodes: %d, Rating: %.2f, Members: %d\n",
+			anime.Name, anime.Genre, anime.Anitype, anime.Episodes, anime.Rating, anime.Members))
+		count++
+		if count >= 100 {
+			break
 		}
 	}
-	return false
+	return sb.String()
 }

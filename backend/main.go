@@ -1,12 +1,12 @@
 package main
 
 import (
-	controller "backend/controller"
+	"backend/controller"
 	"backend/repository"
-	service "backend/service"
+	"backend/routes"
 	"log"
+	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -16,19 +16,20 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiKey == "" {
+		log.Fatal("OpenAI API key not found in environment variables")
+	}
+
 	repo := repository.NewInMemoryAnimeRepository()
 	jsonFilePath := "./anime.json"
 	if err := repo.LoadAnimesFromJSON(jsonFilePath); err != nil {
 		log.Fatalf("Failed to load anime data from JSON file: %v", err)
 	}
 
-	animeService := service.NewAnimeService(repo)
+	chatController := controller.NewChatController(repo, openaiKey)
 
-	animeController := controller.NewAnimeController(animeService)
-
-	r := gin.Default()
-	r.POST("/recommendations", animeController.GetRecommendations)
-	r.POST("/evaluate/:id", animeController.EvaluateAnime)
+	r := routes.SetupRouter(chatController)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to run server: ", err)
